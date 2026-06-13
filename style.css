@@ -32,8 +32,8 @@ p {
 }
 
 .app-circle {
-    position: relative;
-    margin: 0 auto;
+    position:relative;
+    margin: 10px auto 0 auto;
     width: 200px;
     height: 200px;
 }
