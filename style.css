@@ -85,6 +85,8 @@ p {
     position: relative;
     top: 50px;
     color: #d8e9ef;
+    letter-spacing: -2px;
+    word-spacing: -28px;
 }
 
 button {
@@ -101,4 +103,27 @@ button {
 
 button:hover {
     color: #90c0d1;
+}
+
+.timer-input-container {
+    margin: 15px auto;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    align-items: center;
+}
+
+.timer-input-container lable {
+    color: #d8e9ef;
+    font-size: 0.9rem;
+}
+
+.timer-input-container input {
+    width: 60px;
+    padding: 6px 8px;
+    text-align: center;
+    background: rgba(255,255,255,0,.08);
+    border: 1px solid #bf5239;
+    border-radius: 4px;
+    color: #d8e9ef;
 }

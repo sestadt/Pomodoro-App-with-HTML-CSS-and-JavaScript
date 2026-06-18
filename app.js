@@ -1,40 +1,97 @@
-const bells = new Audio(" ./sounds/bells.wav");
+const bells = document.getElementById('bells');
+if (bells) bells.volume = 0.8;
 const startBtn = document.querySelector(".btn-start");
-const session = document.querySelector(".minutes");
+const pauseBtn = document.querySelector(".btn-pause");
+const resetBtn = document.querySelector(".btn-reset");
+const minuteSpan = document.querySelector(".minutes");
+const secondSpan = document.querySelector(".seconds");
+
 let myInterval;
-let state = true;
+let remainingSeconds = parseDisplayTime();
+let originalSeconds = remainingSeconds;
+let timerState = "ready";
 
-const appTimer = () => {
-    const sessionAmount = Number.parseInt(session.textContent);
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    minuteSpan.textContent = String(minutes);
+    secondSpan.textContent = String(secs).padStart(2, "0");
+}
 
-    if (state) {
-        state = false;
-        let totalSeconds = sessionAmount * 60;
+function startTimer() {
+    if (timerState === "running") {
+        alert("Session has already started. Click pause to pause the timer or reset to start over.");
+            return;
+        }
 
-        const updateSeconds = () => {
-            const minuteDiv = document.querySelector(" .minutes");
-            const secondDiv = document.querySelector(" .seconds");
-
-            totalSeconds--;
-
-            let minutesLeft = Math.floor(totalSeconds / 60);
-            let secondsLeft = totalSeconds % 60;
-
-            if (secondsLeft < 10) {
-                secondDiv.textContent = "0" + secondsLeft;
-            } else {
-                secondDiv.textContent = secondsLeft;
-            }
-            minuteDiv.textContent = `${minutesLeft}`;
-
-            if (minutesLeft === 0 && secondsLeft === 0) {
-                bells.play();
-                clearInterval(myInterval);
-            }
-        };
-        myInterval = setInterval(updateSeconds, 1000);
-    } else {
-        alert("Session has already been started. ");
+    if (timerState === "ready") {
+        remainingSeconds = parseDisplayTime();
+        originalSeconds = remainingSeconds;
     }
-};
-startBtn.addEventListener("click", appTimer);
+
+    timerState = "running";
+    minuteSpan.contentEditable = "false";
+    secondSpan.contentEditable = "false";
+
+    myInterval = setInterval(() => {
+        remainingSeconds -= 1;
+        formatTime(remainingSeconds);
+
+        if (remainingSeconds <= 0) {
+            clearInterval(myInterval);
+            try {
+                bells.pause();
+                bells.currentTime = 0;
+                bells.play();
+            } catch (e) {
+                console.warn('Bell playback failed', e);
+            }
+            timerState = "ready";
+            minuteSpan.contentEditable = "true";
+            secondSpan.contentEditable = "true";
+            startBtn.textContent = "start";
+            pauseBtn.textContent = "pause";
+        }
+    }, 1000);
+}
+
+function pauseTimer() {
+    if (timerState !== "running") return;
+    clearInterval(myInterval);
+    timerState = "paused";
+}
+
+function resetTimer() {
+    clearInterval(myInterval);
+    timerState = "ready";
+    remainingSeconds = originalSeconds;
+    formatTime(originalSeconds);
+    minuteSpan.contentEditable = "true";
+    secondSpan.contentEditable = "true";
+}
+
+startBtn.addEventListener("click", startTimer);
+
+pauseBtn.addEventListener("click", () => {
+    if (timerState === "paused") {
+        startTimer();
+    } else {
+        pauseTimer();
+    }
+});
+
+resetBtn.addEventListener("click", resetTimer);
+
+function parseDisplayTime() {
+    const minutes = Number(minuteSpan.textContent.trim()) || 0;
+    const seconds = Number(secondSpan.textContent.trim()) || 0;
+    return minutes * 60 + seconds;
+}
+
+minuteSpan.addEventListener("blur", () => {
+    originalSeconds = parseDisplayTime();
+});
+
+secondSpan.addEventListener("blur", () => {
+    originalSeconds = parseDisplayTime();
+});
